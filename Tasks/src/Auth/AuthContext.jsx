@@ -1,10 +1,11 @@
 // src/Authentication/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from "react";
+import BACKEND_URL from "../utils/apiConfig";
 
 const AuthContext = createContext();
 
-// Replace 3000 with whatever port your Express backend runs on
-const API = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+// Use the centralized API config
+const API = BACKEND_URL;
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);

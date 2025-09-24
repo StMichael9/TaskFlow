@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../Auth/AuthContext";
 import { useNavigate } from "react-router-dom";
+import BACKEND_URL from "../utils/apiConfig";
 
-const API_URL = "http://localhost:3000";
+const API_URL = BACKEND_URL;
 
 const Tracker = () => {
   const { user } = useAuth();

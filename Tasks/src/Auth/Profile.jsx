@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
+import BACKEND_URL from "../utils/apiConfig";
 
 export default function Profile() {
   const { user, logout } = useAuth();
@@ -28,7 +29,7 @@ export default function Profile() {
   const fetchUserStats = async () => {
     try {
       setIsLoading(true);
-      const API = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+      const API = BACKEND_URL;
 
       // Get tasks stats
       const tasksRes = await fetch(`${API}/api/tasks`, {

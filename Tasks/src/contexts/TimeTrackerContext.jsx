@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef } from "react";
+import BACKEND_URL from "../utils/apiConfig";
 
-const API = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+const API = BACKEND_URL;
 const TimeTrackerContext = createContext();
 
 export const useTimeTracker = () => useContext(TimeTrackerContext);

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../Auth/AuthContext";
 import { useNavigate } from "react-router-dom";
+import BACKEND_URL from "../utils/apiConfig";
 
-const API = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+const API = BACKEND_URL;
 
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
