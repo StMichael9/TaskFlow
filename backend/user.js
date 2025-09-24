@@ -13,9 +13,11 @@ const prisma = new PrismaClient();
 
 // rate limiter for login attempts
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5,
+  windowMs: 5 * 60 * 1000, // 5 minutes (as requested)
+  max: 5, // 5 attempts
   message: { message: "Too many login attempts, please try again later" },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
 router.post(
@@ -65,8 +67,9 @@ router.post(
         .cookie("token", token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Use "none" for cross-site in production
           maxAge: 15 * 60 * 1000, // 15 minutes
+          domain: process.env.NODE_ENV === "production" ? ".onrender.com" : undefined // Optional: set domain in production
         })
         .status(201)
         .json({
@@ -110,8 +113,9 @@ router.post(
         .cookie("token", token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Use "none" for cross-site in production
           maxAge: 15 * 60 * 1000,
+          domain: process.env.NODE_ENV === "production" ? ".onrender.com" : undefined // Optional: set domain in production
         })
         .json({ message: "Logged in" });
     } catch (error) {
@@ -126,7 +130,8 @@ router.post("/logout", (req, res) => {
     .clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Match the same settings used for setting cookie
+      domain: process.env.NODE_ENV === "production" ? ".onrender.com" : undefined // Match domain setting
     })
     .json({ message: "Logged out successfully" });
 });

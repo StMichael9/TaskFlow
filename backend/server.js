@@ -17,6 +17,12 @@ const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 app.use(express.json());
 app.use(cookieParser());
+
+// Set NODE_ENV for production
+if (process.env.NODE_ENV !== 'production' && process.env.FRONTEND_URL && process.env.FRONTEND_URL.includes('vercel.app')) {
+  process.env.NODE_ENV = 'production';
+  console.log('Setting NODE_ENV to production based on FRONTEND_URL');
+}
 app.use(
   cors({
     origin: function (origin, callback) {
