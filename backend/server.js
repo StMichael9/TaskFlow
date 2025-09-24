@@ -28,7 +28,7 @@ app.use(
 
 // Public health-check
 app.get("/", (req, res) => {
-  res.send("WeathMate!");
+  res.send("TaskFlow!");
 });
 
 // Mount your signup/login routes under /auth
