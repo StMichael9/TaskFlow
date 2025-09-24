@@ -19,17 +19,17 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: function(origin, callback) {
+    origin: function (origin, callback) {
       // Allow requests with no origin (like mobile apps, curl requests)
       if (!origin) return callback(null, true);
-      
+
       const allowedOrigins = [
         "http://localhost:5173",
         "http://localhost:5174",
         process.env.FRONTEND_URL,
-        "https://task-flow-phi-brown.vercel.app"
+        "https://task-flow-phi-brown.vercel.app",
       ];
-      
+
       if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
         callback(null, true);
       } else {
