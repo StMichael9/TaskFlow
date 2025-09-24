@@ -19,10 +19,15 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"], // Allow both frontend ports
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], // Added PATCH method
+    origin: [
+      "http://localhost:5173", 
+      "http://localhost:5174",
+      process.env.FRONTEND_URL, // Production frontend URL
+      "https://task-flow-phi-brown.vercel.app" // Explicitly add it as well
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // <-- allow cookies
+    credentials: true, // Allow cookies
   })
 );
 
