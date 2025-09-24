@@ -56,9 +56,14 @@ router.post(
       const user = await prisma.user.create({
         data: { email, username, password: hashed },
       });
+      
+      console.log("User created successfully:", user.id);
 
-      // sign token
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+      // sign token with proper payload structure
+      const payload = { userId: user.id };
+      console.log("Creating token with payload:", payload);
+      
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: "15m",
       });
 
@@ -66,14 +71,15 @@ router.post(
       return res
         .cookie("token", token, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Use "none" for cross-site in production
+          secure: true, // Always use secure cookies
+          sameSite: "none", // Required for cross-site cookies
           maxAge: 15 * 60 * 1000, // 15 minutes
-          domain: process.env.NODE_ENV === "production" ? ".onrender.com" : undefined // Optional: set domain in production
+          // Don't set domain to allow the browser to handle it correctly
         })
         .status(201)
         .json({
           user: { id: user.id, email: user.email, username: user.username },
+          token: token, // Include token in response body for localStorage fallback
         });
     } catch (error) {
       console.error(error);
@@ -105,19 +111,27 @@ router.post(
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+      // Create token with proper payload structure
+      const payload = { userId: user.id };
+      console.log("Creating login token with payload:", payload);
+      
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: "15m",
       });
 
       return res
         .cookie("token", token, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Use "none" for cross-site in production
+          secure: true, // Always use secure cookies
+          sameSite: "none", // Required for cross-site cookies
           maxAge: 15 * 60 * 1000,
-          domain: process.env.NODE_ENV === "production" ? ".onrender.com" : undefined // Optional: set domain in production
+          // Don't set domain to allow the browser to handle it correctly
         })
-        .json({ message: "Logged in" });
+        .json({
+          message: "Logged in",
+          token: token, // Include token in response body for localStorage fallback
+          user: { id: user.id, email: user.email, username: user.username },
+        });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Internal server error" });
@@ -129,9 +143,9 @@ router.post("/logout", (req, res) => {
   res
     .clearCookie("token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Match the same settings used for setting cookie
-      domain: process.env.NODE_ENV === "production" ? ".onrender.com" : undefined // Match domain setting
+      secure: true, // Always use secure cookies
+      sameSite: "none", // Required for cross-site cookies
+      // Don't set domain to allow the browser to handle it correctly
     })
     .json({ message: "Logged out successfully" });
 });

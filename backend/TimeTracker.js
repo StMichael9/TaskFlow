@@ -6,7 +6,7 @@ const router = express.Router();
 const prisma = new PrismaClient();
 
 // ✅ Get all trackers for logged-in user
-router.get("/", authenticate, async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const trackers = await prisma.tracker.findMany({
       where: { userId: req.user.id },

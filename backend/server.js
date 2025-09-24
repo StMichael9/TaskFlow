@@ -19,15 +19,26 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Set NODE_ENV for production
-if (process.env.NODE_ENV !== 'production' && process.env.FRONTEND_URL && process.env.FRONTEND_URL.includes('vercel.app')) {
-  process.env.NODE_ENV = 'production';
-  console.log('Setting NODE_ENV to production based on FRONTEND_URL');
-}
+console.log("Current NODE_ENV:", process.env.NODE_ENV);
+console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
+process.env.NODE_ENV = "production";
+console.log("Setting NODE_ENV to production for consistent behavior");
+// For debugging purposes, log every request
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} from ${req.headers.origin || 'Unknown Origin'}`);
+  next();
+});
+
 app.use(
   cors({
     origin: function (origin, callback) {
+      console.log("Request from origin:", origin);
+      
       // Allow requests with no origin (like mobile apps, curl requests)
-      if (!origin) return callback(null, true);
+      if (!origin) {
+        console.log("No origin provided - allowing request");
+        return callback(null, true);
+      }
 
       const allowedOrigins = [
         "http://localhost:5173",
@@ -35,16 +46,20 @@ app.use(
         process.env.FRONTEND_URL,
         "https://task-flow-phi-brown.vercel.app",
       ];
+      
+      console.log("Allowed origins:", allowedOrigins);
 
-      if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        console.log("Origin explicitly allowed:", origin);
         callback(null, true);
       } else {
-        console.log("Blocked origin:", origin);
+        console.log("⚠️ Warning: Allowing origin not in whitelist:", origin);
         callback(null, true); // Temporarily allow all origins for debugging
       }
     },
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Set-Cookie"],
     credentials: true, // Allow cookies
   })
 );
@@ -52,6 +67,20 @@ app.use(
 // Public health-check
 app.get("/", (req, res) => {
   res.send("TaskFlow!");
+});
+
+// Environment check (for debugging)
+app.get("/env-check", (req, res) => {
+  const hasJwtSecret = !!process.env.JWT_SECRET;
+  const jwtSecretLength = process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 0;
+  
+  res.json({
+    nodeEnv: process.env.NODE_ENV,
+    frontendUrl: process.env.FRONTEND_URL,
+    hasJwtSecret,
+    jwtSecretLength,
+    time: new Date().toISOString(),
+  });
 });
 
 // Mount your signup/login routes under /auth
@@ -75,7 +104,8 @@ app.use("/api/tasks", tasksRouter);
 app.use("/api/notes", notesRouter);
 
 // Mount tracker routes under /api/tracker
-app.use("/api/tracker", trackerRouter);
+// Apply authenticate middleware correctly
+app.use("/api/tracker", authenticate, trackerRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
