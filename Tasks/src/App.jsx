@@ -8,7 +8,7 @@ import LoginForm from "./Auth/LoginForm.jsx";
 import SignupForm from "./Auth/SignupForm.jsx";
 import Profile from "./Auth/Profile.jsx";
 
-import Tasks from "./ToDoList/tasks.jsx";
+import Tasks from "./ToDoList/Tasks.jsx";
 import Notes from "./Notes/Notes.jsx";
 import Tracker from "./Tracker/Tracker.jsx";
 import Dashboard from "./Dashboard/Dashboard.jsx";
