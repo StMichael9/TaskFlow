@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  username  String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  tasks     Task[]
+  notes     Note[]
+  trackers  Tracker[]
+}
+
+model Task {
+  id        Int      @id @default(autoincrement())
+  title     String
+  completed Boolean  @default(false)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String   @default("")
+  category  String   @default("General")
+  type      String   @default("regular") // "regular" or "sticky"
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tracker {
+  id             Int       @id @default(autoincrement())
+  title          String
+  targetDuration Int? // in seconds, optional
+  weeklyGoal     Int? // in seconds, optional
+  totalTime      Int       @default(0) // total tracked time in seconds
+  isRunning      Boolean   @default(false)
+  startTime      DateTime? // when tracking started (null if not running)
+
+  // relations
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // optional: session history
+  sessions TrackerSession[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TrackerSession {
+  id        Int       @id @default(autoincrement())
+  startTime DateTime
+  endTime   DateTime?
+  duration  Int       @default(0) // in seconds
+
+  trackerId Int
+  tracker   Tracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
